@@ -14,10 +14,38 @@ const AddExpenseForm = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitted Data:", formData);
-    // TODO: Add functionality to send data to backend
+
+    try {
+      const response = await fetch("http://localhost:5000/api/expenses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Expense saved:", data);
+        alert("Expense added successfully!");
+        setFormData({
+          date: "",
+          category: "",
+          amount: "",
+          title: "",
+          message: ""
+        });
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to save expense:", errorText);
+        alert("Failed to save expense: " + errorText);
+      }
+    } catch (error) {
+      console.error("Error connecting to backend:", error);
+      alert("Error connecting to backend.");
+    }
   };
 
   return (
@@ -33,6 +61,7 @@ const AddExpenseForm = () => {
             value={formData.date}
             onChange={handleChange}
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+            required
           />
         </div>
 
@@ -44,12 +73,12 @@ const AddExpenseForm = () => {
             value={formData.category}
             onChange={handleChange}
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+            required
           >
             <option value="">Select the category</option>
             <option value="Food">Food</option>
             <option value="Transport">Transport</option>
             <option value="Shopping">Shopping</option>
-            {/* Add more categories if needed */}
           </select>
         </div>
 
@@ -63,6 +92,7 @@ const AddExpenseForm = () => {
             onChange={handleChange}
             placeholder="$0.00"
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+            required
           />
         </div>
 
@@ -76,6 +106,7 @@ const AddExpenseForm = () => {
             onChange={handleChange}
             placeholder="e.g. Dinner"
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+            required
           />
         </div>
 
@@ -104,5 +135,7 @@ const AddExpenseForm = () => {
 };
 
 export default AddExpenseForm;
+
+
 
 
