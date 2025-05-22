@@ -6,6 +6,8 @@ import ExpensesPage from "./pages/ExpensesPage";
 import Layout from "./components/Layout";
 import AddIncomePage from "./pages/AddIncomePage";
 
+
+
 function App() {
   return (
     <Router>
@@ -15,6 +17,8 @@ function App() {
           <Route path="/add-expense" element={<AddExpensePage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
           <Route path="/add-income" element={<AddIncomePage />} />
+         
+
           {/* Add more routes as needed */}
         </Routes>
       </Layout>

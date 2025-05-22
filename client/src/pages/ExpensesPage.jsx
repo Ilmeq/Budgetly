@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { FaFilter, FaSyncAlt } from "react-icons/fa";
+import { FaFilter, FaUndo } from "react-icons/fa";
 
 function ExpensesPage() {
   const [expenses, setExpenses] = useState([]);
-  const [dateFilter, setDateFilter] = useState(""); // YYYY-MM-DD
-  const [typeFilter, setTypeFilter] = useState(""); // "expense" or "income"
-  const [statusFilter, setStatusFilter] = useState(""); // Future use: outcome/income status
   const [filteredExpenses, setFilteredExpenses] = useState([]);
+  const [filterType, setFilterType] = useState(""); // "income" or "expense"
+  const [filterDate, setFilterDate] = useState("");
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -15,6 +18,7 @@ function ExpensesPage() {
         const data = await response.json();
         console.log("Fetched expenses:", data);
         setExpenses(data);
+        setFilteredExpenses(data);
       } catch (error) {
         console.error("Error fetching expenses:", error);
       }
@@ -23,34 +27,42 @@ function ExpensesPage() {
     fetchData();
   }, []);
 
-  useEffect(() => {
+  const applyFilter = () => {
     let filtered = [...expenses];
 
-    if (dateFilter) {
-      filtered = filtered.filter((item) =>
-        new Date(item.date).toISOString().startsWith(dateFilter)
+    if (filterType) {
+      filtered = filtered.filter((item) => item.type === filterType);
+    }
+
+    if (filterDate) {
+      filtered = filtered.filter(
+        (item) => new Date(item.date).toISOString().split("T")[0] === filterDate
       );
     }
 
-    if (typeFilter) {
-      filtered = filtered.filter((item) => item.type === typeFilter);
-    }
-
-    if (statusFilter) {
-      if (statusFilter === "income") {
-        filtered = filtered.filter((item) => item.type === "income");
-      } else if (statusFilter === "outcome") {
-        filtered = filtered.filter((item) => item.type === "expense");
-      }
-    }
-
     setFilteredExpenses(filtered);
-  }, [expenses, dateFilter, typeFilter, statusFilter]);
+    setCurrentPage(1);
+  };
 
-  const handleReset = () => {
-    setDateFilter("");
-    setTypeFilter("");
-    setStatusFilter("");
+  const resetFilters = () => {
+    setFilterType("");
+    setFilterDate("");
+    setFilteredExpenses(expenses);
+    setCurrentPage(1);
+  };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredExpenses.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   return (
@@ -58,51 +70,56 @@ function ExpensesPage() {
       <h1 className="text-2xl font-bold mb-4">Expenses</h1>
 
       {/* Filter Bar */}
-      <div className="flex items-center mb-4 space-x-4 text-sm">
-        <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-4 bg-gray-100 p-4 rounded-md mb-4 shadow-sm">
+        <div className="flex items-center gap-2">
           <FaFilter className="text-gray-600" />
-          <span className="font-semibold">Filter By</span>
+          <span className="text-gray-700 font-medium">Filter By</span>
         </div>
-
         <div>
+          <label className="mr-2 text-sm">Date:</label>
           <input
             type="date"
-            className="border px-2 py-1 rounded"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="border border-gray-300 rounded px-2 py-1 text-sm"
           />
         </div>
-
         <div>
-          <select
-            className="border px-2 py-1 rounded"
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-          >
-            <option value="">All Types</option>
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </select>
+          <label className="mr-2 text-sm">Expense Type:</label>
+          <input
+            type="radio"
+            name="type"
+            value="expense"
+            checked={filterType === "expense"}
+            onChange={(e) => setFilterType(e.target.value)}
+          />
         </div>
-
         <div>
-          <select
-            className="border px-2 py-1 rounded"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            <option value="income">Income</option>
-            <option value="outcome">Outcome</option>
-          </select>
+          <label className="mr-2 text-sm">Income Type:</label>
+          <input
+            type="radio"
+            name="type"
+            value="income"
+            checked={filterType === "income"}
+            onChange={(e) => setFilterType(e.target.value)}
+          />
         </div>
-
-        <button
-          onClick={handleReset}
-          className="flex items-center text-red-600 hover:underline"
-        >
-          <FaSyncAlt className="mr-1" /> Reset
-        </button>
+        <div>
+          <button
+            onClick={applyFilter}
+            className="bg-blue-500 text-white text-sm px-3 py-1 rounded hover:bg-blue-600"
+          >
+            Apply
+          </button>
+        </div>
+        <div className="flex items-center">
+          <button
+            onClick={resetFilters}
+            className="flex items-center gap-1 bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded hover:bg-gray-400"
+          >
+            <FaUndo /> Reset
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -118,17 +135,12 @@ function ExpensesPage() {
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm font-light">
-            {filteredExpenses.map((item) => (
-              <tr
-                key={item._id}
-                className="border-b border-gray-200 hover:bg-gray-50"
-              >
+            {currentItems.map((item) => (
+              <tr key={item._id} className="border-b border-gray-200 hover:bg-gray-50">
                 <td className="py-3 px-6 text-left">{item.title}</td>
                 <td className="py-3 px-6 text-left">${item.amount}</td>
                 <td className="py-3 px-6 text-left">{item.category}</td>
-                <td className="py-3 px-6 text-left">
-                  {new Date(item.date).toLocaleDateString()}
-                </td>
+                <td className="py-3 px-6 text-left">{new Date(item.date).toLocaleDateString()}</td>
                 <td className="py-3 px-6 text-left">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${
@@ -145,11 +157,34 @@ function ExpensesPage() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-between items-center mt-4">
+        <button
+          onClick={goToPreviousPage}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+        >
+          ◀ Previous
+        </button>
+        <span className="text-sm">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={goToNextPage}
+          disabled={currentPage === totalPages}
+          className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+        >
+          Next ▶
+        </button>
+      </div>
     </div>
   );
 }
 
 export default ExpensesPage;
+
+
 
 
 

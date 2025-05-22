@@ -1,3 +1,5 @@
+require('dotenv').config(); // Load variables from .env
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -10,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection with options and logging
-mongoose.connect('mongodb://127.0.0.1:27017/budgetly', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/budgetly', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
@@ -32,7 +34,6 @@ const ExpenseSchema = new mongoose.Schema({
   message: String,
 });
 
-
 const Expense = mongoose.model('Expense', ExpenseSchema);
 
 const IncomeSchema = new mongoose.Schema({
@@ -44,7 +45,6 @@ const IncomeSchema = new mongoose.Schema({
 });
 
 const Income = mongoose.model('Income', IncomeSchema);
-
 
 // Test route
 app.get('/', (req, res) => {
@@ -70,7 +70,6 @@ app.get('/api/expenses', async (req, res) => {
   }
 });
 
-
 // ✅ Route to add a new expense
 app.post('/api/expenses', async (req, res) => {
   try {
@@ -94,13 +93,13 @@ app.post('/api/incomes', async (req, res) => {
   }
 });
 
-
 // Start server after DB is ready
 mongoose.connection.once('open', () => {
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
   });
 });
+
 
 
 
