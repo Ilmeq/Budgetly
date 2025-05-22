@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import AddExpensePage from "./pages/AddExpensePage";
 import ExpensesPage from "./pages/ExpensesPage";
 import Layout from "./components/Layout";
+import AddIncomePage from "./pages/AddIncomePage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<Navigate to="/expenses" replace />} />
           <Route path="/add-expense" element={<AddExpensePage />} />
           <Route path="/expenses" element={<ExpensesPage />} />
+          <Route path="/add-income" element={<AddIncomePage />} />
           {/* Add more routes as needed */}
         </Routes>
       </Layout>
