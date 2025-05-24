@@ -1,11 +1,17 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Layout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Helper to check if a link is active
   const isActive = (path) => location.pathname === path;
+
+  // Handle logout: clear token and redirect to sign in
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/signin");
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -39,15 +45,27 @@ const Layout = ({ children }) => {
           </Link>
           <Link
             to="/goals"
-            className="block w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md"
+            className={`block w-full text-left px-4 py-2 rounded-md ${
+              isActive("/goals") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+            }`}
           >
             Goals
           </Link>
           <Link
             to="/badges"
-            className="block w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md"
+            className={`block w-full text-left px-4 py-2 rounded-md ${
+              isActive("/badges") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+            }`}
           >
             Badges
+          </Link>
+          <Link
+            to="/planner"
+            className={`block w-full text-left px-4 py-2 rounded-md ${
+              isActive("/planner") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+            }`}
+          >
+            Planner
           </Link>
           <div className="mt-10 border-t pt-4">
             <Link
@@ -56,12 +74,12 @@ const Layout = ({ children }) => {
             >
               Settings
             </Link>
-            <Link
-              to="/logout"
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md"
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md text-red-500"
             >
               Logout
-            </Link>
+            </button>
           </div>
         </nav>
       </aside>
@@ -85,5 +103,7 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
+
 
 
