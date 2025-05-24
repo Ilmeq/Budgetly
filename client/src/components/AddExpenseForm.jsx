@@ -17,11 +17,19 @@ const AddExpenseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("No authentication token found. Please sign in.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:5000/api/expenses", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(formData)
       });
@@ -30,6 +38,10 @@ const AddExpenseForm = () => {
         const data = await response.json();
         console.log("Expense saved:", data);
         alert("Expense added successfully!");
+
+        // ✅ Dispatch event to notify other components
+        window.dispatchEvent(new Event("expenseAdded"));
+
         setFormData({
           date: "",
           category: "",
@@ -68,18 +80,15 @@ const AddExpenseForm = () => {
         {/* Category */}
         <div>
           <label className="block font-medium mb-1">Category</label>
-          <select
+          <input
+            type="text"
             name="category"
             value={formData.category}
             onChange={handleChange}
+            placeholder="Enter category"
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
             required
-          >
-            <option value="">Select the category</option>
-            <option value="Food">Food</option>
-            <option value="Transport">Transport</option>
-            <option value="Shopping">Shopping</option>
-          </select>
+          />
         </div>
 
         {/* Amount */}
@@ -135,6 +144,12 @@ const AddExpenseForm = () => {
 };
 
 export default AddExpenseForm;
+
+
+
+
+
+
 
 
 
