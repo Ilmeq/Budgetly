@@ -22,6 +22,14 @@ const Layout = ({ children }) => {
             Add Expense
           </Link>
           <Link
+            to="/add-income"
+            className={`block w-full text-left px-4 py-2 rounded-md ${
+              isActive("/add-income") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+            }`}
+          >
+            Add Income
+          </Link>
+          <Link
             to="/expenses"
             className={`block w-full text-left px-4 py-2 rounded-md ${
               isActive("/expenses") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
@@ -77,4 +85,5 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
 
