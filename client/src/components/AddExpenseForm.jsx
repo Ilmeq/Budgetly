@@ -47,13 +47,11 @@ const AddExpenseForm = () => {
         console.log("Expense saved:", data);
         alert("Expense added successfully!");
 
-console.log("🚀 Dispatching expenseAdded:", {
-  category: formData.category,
-  amount: parseFloat(formData.amount)
-});
+        console.log("🚀 Dispatching expenseAdded:", {
+          category: formData.category,
+          amount: parseFloat(formData.amount)
+        });
 
-
-        // Dispatch event
         window.dispatchEvent(
           new CustomEvent("expenseAdded", {
             detail: {
@@ -82,92 +80,90 @@ console.log("🚀 Dispatching expenseAdded:", {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-3xl p-6 shadow-md">
-      <h2 className="text-xl font-semibold mb-4">+ Add Expense</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-medium mb-1">Date</label>
-          <input
-            type="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
-            required
-          />
-        </div>
+    <div className="min-h-screen flex items-start justify-center pt-20 bg-[#e6f7fd]">
+      <div className="max-w-md bg-white rounded-3xl p-6 shadow-md w-full">
+        <h2 className="text-xl font-semibold mb-4">+ Add Expense</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block font-medium mb-1">Date</label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block font-medium mb-1">Category</label>
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
-            required
+          <div>
+            <label className="block font-medium mb-1">Category</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+              required
+            >
+              <option value="">Select the category</option>
+              {CATEGORY_OPTIONS.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Amount</label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              placeholder="$0.00"
+              className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+              required
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Expense Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="e.g. Dinner"
+              className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
+              required
+            />
+          </div>
+
+          <div>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              placeholder="Enter message (optional)"
+              className="w-full px-3 py-2 rounded-md bg-[#e7f7fe] outline-none text-teal-600 font-medium"
+              rows="2"
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md"
           >
-            <option value="">Select the category</option>
-            {CATEGORY_OPTIONS.map((cat) => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1">Amount</label>
-          <input
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            placeholder="$0.00"
-            className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
-            required
-            min="0"
-            step="0.01"
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium mb-1">Expense Title</label>
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="e.g. Dinner"
-            className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
-            required
-          />
-        </div>
-
-        <div>
-          <textarea
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            placeholder="Enter message (optional)"
-            className="w-full px-3 py-2 rounded-md bg-[#e7f7fe] outline-none text-teal-600 font-medium"
-            rows="2"
-          ></textarea>
-        </div>
-
-        <button
-          type="submit"
-          className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md"
-        >
-          + Add Expense
-        </button>
-      </form>
+            + Add Expense
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
 
 export default AddExpenseForm;
-
-
-
-
 
 
 

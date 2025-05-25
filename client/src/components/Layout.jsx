@@ -25,7 +25,7 @@ const Layout = ({ children }) => {
 
     try {
       const res = await fetch("http://localhost:5000/api/planner/progress", {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) {
@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
           ? "danger"
           : msg.includes("90%")
           ? "warning"
-          : "info"
+          : "info",
       }));
 
       setNotifications(formatted);
@@ -112,7 +112,6 @@ const Layout = ({ children }) => {
             { path: "/add-income", label: "Add Income" },
             { path: "/expenses", label: "Expenses" },
             { path: "/limits", label: "Spending Limits" },
-            { path: "/goals", label: "Goals" },
             { path: "/badges", label: "Badges" },
             { path: "/planner", label: "Planner" },
           ].map(({ path, label }) => (
@@ -130,12 +129,6 @@ const Layout = ({ children }) => {
           ))}
 
           <div className="mt-10 border-t pt-4">
-            <Link
-              to="/settings"
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md"
-            >
-              Settings
-            </Link>
             <button
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md text-red-500"
@@ -155,14 +148,6 @@ const Layout = ({ children }) => {
 
       {/* Main Content with animation */}
       <main className="flex-1 p-8 bg-[#e7f7fe] relative overflow-hidden">
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full max-w-md px-4 py-2 rounded-md border outline-none"
-          />
-        </div>
-
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -180,6 +165,9 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
+
+
 
 
 

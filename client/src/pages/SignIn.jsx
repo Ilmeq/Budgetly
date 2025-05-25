@@ -14,22 +14,23 @@ const SignIn = () => {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emailOrPhone: email, password }), //  
+        body: JSON.stringify({ emailOrPhone: email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token); // Store token
-        navigate("/expenses"); 
+        localStorage.setItem("token", data.token);
+        navigate("/expenses");
       } else {
-        alert(data.error || "Login failed"); 
+        alert(data.error || "Login failed");
       }
     } catch (err) {
       console.error("Login error:", err);
       alert("Login failed");
     }
   };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="flex shadow-lg rounded-2xl overflow-hidden max-w-4xl w-full">
@@ -53,11 +54,6 @@ const SignIn = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-md"
               required
             />
-            <div className="text-right text-sm">
-              <button type="button" className="text-green-600 hover:underline">
-                Forgot your password?
-              </button>
-            </div>
             <button
               type="submit"
               className="w-full py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-200"
@@ -89,5 +85,6 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
 
 
