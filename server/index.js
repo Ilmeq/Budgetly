@@ -1,9 +1,13 @@
-require('dotenv').config(); // Load variables from .env
+require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const authenticateToken = require('./middleware/authMiddleware');
+
+// Import models
+const Expense = require('./models/Expense');
+const Income = require('./models/Income');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -11,20 +15,19 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
-  credentials: true // only if you're using cookies or Authorization headers
+  credentials: true,
 }));
-
 app.use(express.json());
 
-// ✅ Connect auth routes
+// Auth routes
 const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
-// ✅ Import and use planner routes
+// Planner routes (merged planner + progress)
 const plannerRoutes = require('./routes/planner');
-app.use('/api/planner', authenticateToken, plannerRoutes); // protect planner routes too
+app.use('/api/planner', plannerRoutes);
 
-// MongoDB connection with IPv4 and logging
+// MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/budgetly', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -33,41 +36,16 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/budgetly'
 mongoose.connection.on('connected', () => {
   console.log('✅ Mongoose connected to MongoDB');
 });
-
 mongoose.connection.on('error', (err) => {
   console.error('❌ Mongoose connection error:', err);
 });
 
-// ✅ Define Expense schema and model (with userId)
-const ExpenseSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-  date: Date,
-  category: String,
-  amount: Number,
-  title: String,
-  message: String,
-});
-
-const Expense = mongoose.model('Expense', ExpenseSchema);
-
-// ✅ Define Income schema and model (with userId)
-const IncomeSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
-  date: Date,
-  category: String,
-  amount: Number,
-  title: String,
-  message: String,
-});
-
-const Income = mongoose.model('Income', IncomeSchema);
-
-// ✅ Test route
+// Test route
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
 
-// ✅ Route to fetch all expenses & incomes for a user (protected)
+// Get all expenses & incomes for logged-in user
 app.get('/api/expenses', authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -80,7 +58,6 @@ app.get('/api/expenses', authenticateToken, async (req, res) => {
       ...incomes.map(i => ({ ...i, type: 'income' })),
     ];
 
-    // Sort by date, newest first
     combined.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.json(combined);
@@ -90,7 +67,7 @@ app.get('/api/expenses', authenticateToken, async (req, res) => {
   }
 });
 
-// ✅ Route to add a new expense (protected)
+// Add a new expense
 app.post('/api/expenses', authenticateToken, async (req, res) => {
   try {
     const newExpense = new Expense({
@@ -105,7 +82,7 @@ app.post('/api/expenses', authenticateToken, async (req, res) => {
   }
 });
 
-// ✅ Route to add a new income (protected)
+// Add a new income
 app.post('/api/incomes', authenticateToken, async (req, res) => {
   try {
     const newIncome = new Income({
@@ -120,32 +97,52 @@ app.post('/api/incomes', authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE an expense by ID (protected)
+// DELETE expense by id
 app.delete('/api/expenses/:id', authenticateToken, async (req, res) => {
   try {
-    const expenseId = req.params.id;
     const userId = req.user.userId;
+    const expenseId = req.params.id;
 
-    // Delete only if the expense belongs to the logged-in user
-    const deletedExpense = await Expense.findOneAndDelete({ _id: expenseId, userId });
+    const deleted = await Expense.findOneAndDelete({ _id: expenseId, userId });
 
-    if (!deletedExpense) {
-      return res.status(404).json({ message: 'Expense not found or unauthorized' });
+    if (!deleted) {
+      return res.status(404).json({ error: 'Expense not found or unauthorized' });
     }
 
     res.json({ message: 'Expense deleted successfully' });
   } catch (err) {
     console.error('❌ Error deleting expense:', err);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
 
-// ✅ Start server after DB is ready
-mongoose.connection.once('open', () => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
+// DELETE income by id
+app.delete('/api/incomes/:id', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const incomeId = req.params.id;
+
+    const deleted = await Income.findOneAndDelete({ _id: incomeId, userId });
+
+    if (!deleted) {
+      return res.status(404).json({ error: 'Income not found or unauthorized' });
+    }
+
+    res.json({ message: 'Income deleted successfully' });
+  } catch (err) {
+    console.error('❌ Error deleting income:', err);
+    res.status(500).json({ error: err.message || 'Unknown error' });
+  }
 });
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+}); 
+
+
+
+
+
 
 
 

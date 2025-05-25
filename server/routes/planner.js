@@ -1,39 +1,95 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../middleware/authMiddleware');
 const Planner = require('../models/Planner');
+const Expense = require('../models/Expense');
 
-// Create new plan
-router.post('/', async (req, res) => {
-  const { userId, startAmount, durationDays, spendingLimits } = req.body;
-
-  if (!userId || !startAmount || !durationDays || !spendingLimits) {
-    return res.status(400).json({ message: 'Missing required fields' });
-  }
-
+// POST route to save/update planner
+router.post('/', authenticateToken, async (req, res) => {
   try {
-    const newPlan = new Planner({
-      userId,
-      startAmount,
-      durationDays,
-      spendingLimits,
-    });
+    const userId = req.user.userId;
+    const { initialAmount, startDate, endDate, categories } = req.body;
 
-    await newPlan.save();
-    res.status(201).json(newPlan);
+    if (!initialAmount || !startDate || !endDate || !categories) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const planner = await Planner.findOneAndUpdate(
+      { userId },
+      { initialAmount, startDate, endDate, categories },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    res.status(201).json(planner);
   } catch (error) {
-    res.status(500).json({ message: 'Error creating plan', error });
+    console.error("❌ Error saving planner:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// Get user's current plan
-router.get('/:userId', async (req, res) => {
+// GET /planner/progress route
+router.get('/progress', authenticateToken, async (req, res) => {
   try {
-    const plan = await Planner.findOne({ userId: req.params.userId }).sort({ createdAt: -1 });
-    if (!plan) return res.status(404).json({ message: 'No plan found' });
-    res.json(plan);
+    const userId = req.user.userId;
+    const today = new Date();
+
+    const activePlanner = await Planner.findOne({
+      userId,
+      startDate: { $lte: today },
+      endDate: { $gte: today },
+    });
+
+    if (!activePlanner) {
+      return res.status(404).json({ message: 'No active planner found' });
+    }
+
+    const expensesByCategory = await Expense.aggregate([
+      {
+        $match: {
+          userId: activePlanner.userId,
+          date: {
+            $gte: new Date(activePlanner.startDate),
+            $lte: new Date(activePlanner.endDate),
+          },
+          category: { $ne: null }
+        }
+      },
+      {
+        $group: {
+          _id: '$category',
+          totalSpent: { $sum: '$amount' }
+        }
+      }
+    ]);
+
+    const progress = {};
+    activePlanner.categories.forEach((cat) => {
+      progress[cat.category] = {
+        limit: cat.limit,
+        spent: 0
+      };
+    });
+
+    expensesByCategory.forEach((item) => {
+      if (progress[item._id]) {
+        progress[item._id].spent = item.totalSpent;
+      }
+    });
+
+    res.json({ categories: progress });
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching plan', error });
+    console.error('❌ Error in /planner/progress:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+
+

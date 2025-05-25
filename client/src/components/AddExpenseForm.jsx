@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 
+const CATEGORY_OPTIONS = [
+  "Groceries",
+  "Bills, rent, insurance",
+  "Entertainment & Lifestyle",
+  "Unexpected",
+  "Medical"
+];
+
 const AddExpenseForm = () => {
   const [formData, setFormData] = useState({
     date: "",
@@ -39,8 +47,15 @@ const AddExpenseForm = () => {
         console.log("Expense saved:", data);
         alert("Expense added successfully!");
 
-        // ✅ Dispatch event to notify other components
-        window.dispatchEvent(new Event("expenseAdded"));
+        // Dispatch event
+        window.dispatchEvent(
+          new CustomEvent("expenseAdded", {
+            detail: {
+              category: formData.category,
+              amount: parseFloat(formData.amount)
+            }
+          })
+        );
 
         setFormData({
           date: "",
@@ -64,7 +79,6 @@ const AddExpenseForm = () => {
     <div className="max-w-md mx-auto bg-white rounded-3xl p-6 shadow-md">
       <h2 className="text-xl font-semibold mb-4">+ Add Expense</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Date */}
         <div>
           <label className="block font-medium mb-1">Date</label>
           <input
@@ -77,21 +91,22 @@ const AddExpenseForm = () => {
           />
         </div>
 
-        {/* Category */}
         <div>
           <label className="block font-medium mb-1">Category</label>
-          <input
-            type="text"
+          <select
             name="category"
             value={formData.category}
             onChange={handleChange}
-            placeholder="Enter category"
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
             required
-          />
+          >
+            <option value="">Select the category</option>
+            {CATEGORY_OPTIONS.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
-        {/* Amount */}
         <div>
           <label className="block font-medium mb-1">Amount</label>
           <input
@@ -102,10 +117,11 @@ const AddExpenseForm = () => {
             placeholder="$0.00"
             className="w-full px-3 py-1.5 rounded-md bg-[#e7f7fe] outline-none"
             required
+            min="0"
+            step="0.01"
           />
         </div>
 
-        {/* Expense Title */}
         <div>
           <label className="block font-medium mb-1">Expense Title</label>
           <input
@@ -119,19 +135,17 @@ const AddExpenseForm = () => {
           />
         </div>
 
-        {/* Message */}
         <div>
           <textarea
             name="message"
             value={formData.message}
             onChange={handleChange}
-            placeholder="Enter Message"
+            placeholder="Enter message (optional)"
             className="w-full px-3 py-2 rounded-md bg-[#e7f7fe] outline-none text-teal-600 font-medium"
             rows="2"
           ></textarea>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-md"

@@ -14,7 +14,7 @@ const SignIn = () => {
       const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }), // <-- Fixed here
+        body: JSON.stringify({ emailOrPhone: email, password }), // ✅ Fixed here
       });
 
       const data = await response.json();
@@ -23,7 +23,7 @@ const SignIn = () => {
         localStorage.setItem("token", data.token); // ✅ Store token
         navigate("/expenses"); // ✅ Go to protected page
       } else {
-        alert(data.message || "Login failed");
+        alert(data.error || "Login failed"); // ✅ Use 'error' field
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -93,4 +93,5 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
 

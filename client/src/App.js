@@ -9,7 +9,7 @@ import AddIncomePage from "./pages/AddIncomePage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PrivateRoute from "./PrivateRoute";
-
+import Planner from "./pages/Planner"; // ✅ Added import
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -50,7 +50,14 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
-       
+        <Route
+          path="/planner"
+          element={
+            <PrivateRoute>
+              <Planner />
+            </PrivateRoute>
+          }
+        />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Layout>
@@ -73,6 +80,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

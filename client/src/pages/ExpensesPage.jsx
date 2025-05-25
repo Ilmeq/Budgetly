@@ -75,14 +75,14 @@ function ExpensesPage() {
     setCurrentPage(1);
   };
 
-  // New function: delete expense by id
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+  const handleDelete = async (id, type) => {
+    if (!window.confirm("Are you sure you want to delete this record?")) return;
 
     try {
       const token = localStorage.getItem("token");
+      const endpoint = type === 'income' ? 'incomes' : 'expenses';
 
-      const response = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/${endpoint}/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -90,7 +90,7 @@ function ExpensesPage() {
       });
 
       if (response.ok) {
-        // Remove deleted expense from state
+        // Remove deleted record from state
         const updatedExpenses = expenses.filter((expense) => expense._id !== id);
         setExpenses(updatedExpenses);
 
@@ -104,10 +104,10 @@ function ExpensesPage() {
         }
       } else {
         const errorData = await response.json();
-        alert("Failed to delete expense: " + (errorData.error || response.statusText));
+        alert("Failed to delete record: " + (errorData.error || response.statusText));
       }
     } catch (error) {
-      alert("Error deleting expense: " + error.message);
+      alert("Error deleting record: " + error.message);
     }
   };
 
@@ -199,7 +199,7 @@ function ExpensesPage() {
               <th className="py-3 px-6 text-left">Category</th>
               <th className="py-3 px-6 text-left">Date</th>
               <th className="py-3 px-6 text-left">Type</th>
-              <th className="py-3 px-6 text-left">Actions</th> {/* New column for delete */}
+              <th className="py-3 px-6 text-left">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm font-light">
@@ -224,9 +224,9 @@ function ExpensesPage() {
                 </td>
                 <td className="py-3 px-6 text-left">
                   <button
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => handleDelete(item._id, item.type)}
                     className="text-red-600 hover:text-red-800 flex items-center gap-1"
-                    title="Delete Expense"
+                    title="Delete Record"
                   >
                     <FaTrash /> Delete
                   </button>
@@ -236,7 +236,7 @@ function ExpensesPage() {
             {currentItems.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No expenses found.
+                  No records found.
                 </td>
               </tr>
             )}

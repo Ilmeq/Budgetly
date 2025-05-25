@@ -7,7 +7,6 @@ const Layout = ({ children }) => {
 
   const isActive = (path) => location.pathname === path;
 
-  // Handle logout: clear token and redirect to sign in
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/signin");
@@ -19,54 +18,25 @@ const Layout = ({ children }) => {
       <aside className="w-60 bg-white shadow-md p-4">
         <h2 className="text-2xl font-bold mb-6">BUDGETLY</h2>
         <nav className="space-y-4">
-          <Link
-            to="/add-expense"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/add-expense") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Add Expense
-          </Link>
-          <Link
-            to="/add-income"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/add-income") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Add Income
-          </Link>
-          <Link
-            to="/expenses"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/expenses") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Expenses
-          </Link>
-          <Link
-            to="/goals"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/goals") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Goals
-          </Link>
-          <Link
-            to="/badges"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/badges") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Badges
-          </Link>
-          <Link
-            to="/planner"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/planner") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Planner
-          </Link>
+          {[
+            { path: "/add-expense", label: "Add Expense" },
+            { path: "/add-income", label: "Add Income" },
+            { path: "/expenses", label: "Expenses" },
+            { path: "/goals", label: "Goals" },
+            { path: "/badges", label: "Badges" },
+            { path: "/planner", label: "Planner" },
+          ].map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`block w-full text-left px-4 py-2 rounded-md ${
+                isActive(path) ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+              }`}
+            >
+              {label}
+            </Link>
+          ))}
+
           <div className="mt-10 border-t pt-4">
             <Link
               to="/settings"
@@ -103,6 +73,7 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+
 
 
 
