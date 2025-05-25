@@ -23,7 +23,6 @@ const SignUp = () => {
       alert("Passwords do not match");
       return;
     }
-
     try {
       const response = await fetch("http://localhost:5000/api/auth/signup", {
         method: "POST",
@@ -49,7 +48,6 @@ const SignUp = () => {
       alert("Signup failed");
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#e7f7fe]">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">

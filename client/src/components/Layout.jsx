@@ -20,6 +20,14 @@ const Layout = ({ children }) => {
         <h2 className="text-2xl font-bold mb-6">BUDGETLY</h2>
         <nav className="space-y-4">
           <Link
+            to="/dashboard"
+            className={`block w-full text-left px-4 py-2 rounded-md ${
+              isActive("/dashboard") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
+            }`}
+          >
+            Dashboard
+          </Link>
+          <Link
             to="/add-expense"
             className={`block w-full text-left px-4 py-2 rounded-md ${
               isActive("/add-expense") ? "bg-teal-500 text-white" : "hover:bg-gray-200"

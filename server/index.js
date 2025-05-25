@@ -1,13 +1,12 @@
 require('dotenv').config(); // Load variables from .env
-
+ 
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const authenticateToken = require('./middleware/authMiddleware');
-
 const app = express();
 const PORT = process.env.PORT || 5000;
-
+ 
 // Middleware
 app.use(cors({
   origin: 'http://localhost:3000',
@@ -29,15 +28,14 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/budgetly'
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-
+ 
 mongoose.connection.on('connected', () => {
   console.log('✅ Mongoose connected to MongoDB');
 });
-
+ 
 mongoose.connection.on('error', (err) => {
   console.error('❌ Mongoose connection error:', err);
 });
-
 // ✅ Define Expense schema and model (with userId)
 const ExpenseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -47,9 +45,8 @@ const ExpenseSchema = new mongoose.Schema({
   title: String,
   message: String,
 });
-
+ 
 const Expense = mongoose.model('Expense', ExpenseSchema);
-
 // ✅ Define Income schema and model (with userId)
 const IncomeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
@@ -59,14 +56,12 @@ const IncomeSchema = new mongoose.Schema({
   title: String,
   message: String,
 });
-
+ 
 const Income = mongoose.model('Income', IncomeSchema);
-
 // ✅ Test route
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
-
 // ✅ Route to fetch all expenses & incomes for a user (protected)
 app.get('/api/expenses', authenticateToken, async (req, res) => {
   try {
@@ -79,17 +74,15 @@ app.get('/api/expenses', authenticateToken, async (req, res) => {
       ...expenses.map(e => ({ ...e, type: 'expense' })),
       ...incomes.map(i => ({ ...i, type: 'income' })),
     ];
-
     // Sort by date, newest first
     combined.sort((a, b) => new Date(b.date) - new Date(a.date));
-
+ 
     res.json(combined);
   } catch (err) {
     console.error('❌ Error fetching records:', err);
     res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
-
 // ✅ Route to add a new expense (protected)
 app.post('/api/expenses', authenticateToken, async (req, res) => {
   try {
@@ -104,7 +97,6 @@ app.post('/api/expenses', authenticateToken, async (req, res) => {
     res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
-
 // ✅ Route to add a new income (protected)
 app.post('/api/incomes', authenticateToken, async (req, res) => {
   try {
@@ -119,7 +111,6 @@ app.post('/api/incomes', authenticateToken, async (req, res) => {
     res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
-
 // DELETE an expense by ID (protected)
 app.delete('/api/expenses/:id', authenticateToken, async (req, res) => {
   try {
@@ -139,11 +130,10 @@ app.delete('/api/expenses/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 // ✅ Start server after DB is ready
 mongoose.connection.once('open', () => {
   app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log("🚀 Server running on port ${PORT}");
   });
 });
 

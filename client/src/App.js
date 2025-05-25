@@ -9,6 +9,7 @@ import AddIncomePage from "./pages/AddIncomePage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PrivateRoute from "./PrivateRoute";
+import Dashboard from "./pages/Dashboard"
 
 
 const AppRoutes = () => {
@@ -25,6 +26,14 @@ const AppRoutes = () => {
         <Route
           path="/"
           element={<Navigate to={token ? "/expenses" : "/signin"} replace />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
         />
         <Route
           path="/add-expense"
