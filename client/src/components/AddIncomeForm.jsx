@@ -17,11 +17,14 @@ const AddIncomeForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const token = localStorage.getItem("token");
+
     try {
       const response = await fetch("http://localhost:5000/api/incomes", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -30,6 +33,10 @@ const AddIncomeForm = () => {
         const data = await response.json();
         console.log("Income saved:", data);
         alert("Income added successfully!");
+
+        // ✅ Dispatch event to notify other components
+        window.dispatchEvent(new Event("expenseAdded"));
+
         setFormData({
           date: "",
           category: "",
@@ -124,3 +131,5 @@ const AddIncomeForm = () => {
 };
 
 export default AddIncomeForm;
+
+

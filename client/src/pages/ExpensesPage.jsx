@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaFilter, FaUndo } from "react-icons/fa";
+import { FaFilter, FaUndo, FaTrash } from "react-icons/fa";
 
 function ExpensesPage() {
   const [expenses, setExpenses] = useState([]);
@@ -7,36 +7,60 @@ function ExpensesPage() {
   const [filterType, setFilterType] = useState(""); // "income" or "expense"
   const [filterDate, setFilterDate] = useState("");
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/expenses");
-        const data = await response.json();
-        console.log("Fetched expenses:", data);
+  const fetchData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:5000/api/expenses", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      console.log("Fetched expenses:", data);
+
+      if (response.ok) {
         setExpenses(data);
         setFilteredExpenses(data);
-      } catch (error) {
-        console.error("Error fetching expenses:", error);
+      } else {
+        console.error("Failed to fetch:", data.error);
       }
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+
+    const handleUpdate = () => {
+      fetchData();
     };
 
-    fetchData();
+    window.addEventListener("expenseAdded", handleUpdate);
+
+    return () => {
+      window.removeEventListener("expenseAdded", handleUpdate);
+    };
   }, []);
 
   const applyFilter = () => {
     let filtered = [...expenses];
 
     if (filterType) {
-      filtered = filtered.filter((item) => item.type === filterType);
+      filtered = filtered.filter(
+        (item) => item.type?.toLowerCase() === filterType
+      );
     }
 
     if (filterDate) {
       filtered = filtered.filter(
-        (item) => new Date(item.date).toISOString().split("T")[0] === filterDate
+        (item) =>
+          new Date(item.date).toISOString().split("T")[0] === filterDate
       );
     }
 
@@ -51,7 +75,42 @@ function ExpensesPage() {
     setCurrentPage(1);
   };
 
-  // Pagination logic
+  // New function: delete expense by id
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this expense?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(`http://localhost:5000/api/expenses/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        // Remove deleted expense from state
+        const updatedExpenses = expenses.filter((expense) => expense._id !== id);
+        setExpenses(updatedExpenses);
+
+        // Also update filtered expenses (in case a filter is applied)
+        const updatedFiltered = filteredExpenses.filter((expense) => expense._id !== id);
+        setFilteredExpenses(updatedFiltered);
+
+        // Adjust current page if needed
+        if (updatedFiltered.length <= (currentPage - 1) * itemsPerPage) {
+          setCurrentPage((prev) => Math.max(prev - 1, 1));
+        }
+      } else {
+        const errorData = await response.json();
+        alert("Failed to delete expense: " + (errorData.error || response.statusText));
+      }
+    } catch (error) {
+      alert("Error deleting expense: " + error.message);
+    }
+  };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredExpenses.slice(indexOfFirstItem, indexOfLastItem);
@@ -70,7 +129,7 @@ function ExpensesPage() {
       <h1 className="text-2xl font-bold mb-4">Expenses</h1>
 
       {/* Filter Bar */}
-      <div className="flex items-center gap-4 bg-gray-100 p-4 rounded-md mb-4 shadow-sm">
+      <div className="flex items-center gap-4 bg-gray-100 p-4 rounded-md mb-4 shadow-sm flex-wrap">
         <div className="flex items-center gap-2">
           <FaFilter className="text-gray-600" />
           <span className="text-gray-700 font-medium">Filter By</span>
@@ -120,6 +179,14 @@ function ExpensesPage() {
             <FaUndo /> Reset
           </button>
         </div>
+        <div>
+          <button
+            onClick={fetchData}
+            className="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-600"
+          >
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Table */}
@@ -132,6 +199,7 @@ function ExpensesPage() {
               <th className="py-3 px-6 text-left">Category</th>
               <th className="py-3 px-6 text-left">Date</th>
               <th className="py-3 px-6 text-left">Type</th>
+              <th className="py-3 px-6 text-left">Actions</th> {/* New column for delete */}
             </tr>
           </thead>
           <tbody className="text-gray-700 text-sm font-light">
@@ -140,20 +208,38 @@ function ExpensesPage() {
                 <td className="py-3 px-6 text-left">{item.title}</td>
                 <td className="py-3 px-6 text-left">${item.amount}</td>
                 <td className="py-3 px-6 text-left">{item.category}</td>
-                <td className="py-3 px-6 text-left">{new Date(item.date).toLocaleDateString()}</td>
+                <td className="py-3 px-6 text-left">
+                  {new Date(item.date).toLocaleDateString()}
+                </td>
                 <td className="py-3 px-6 text-left">
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      item.type === "income"
+                      item.type?.toLowerCase() === "income"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
-                    {item.type === "income" ? "Income" : "Expense"}
+                    {item.type?.toLowerCase() === "income" ? "Income" : "Expense"}
                   </span>
+                </td>
+                <td className="py-3 px-6 text-left">
+                  <button
+                    onClick={() => handleDelete(item._id)}
+                    className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                    title="Delete Expense"
+                  >
+                    <FaTrash /> Delete
+                  </button>
                 </td>
               </tr>
             ))}
+            {currentItems.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center py-4 text-gray-500">
+                  No expenses found.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -183,6 +269,9 @@ function ExpensesPage() {
 }
 
 export default ExpensesPage;
+
+
+
 
 
 
