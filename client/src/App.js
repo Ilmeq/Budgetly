@@ -9,7 +9,10 @@ import AddIncomePage from "./pages/AddIncomePage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PrivateRoute from "./PrivateRoute";
-import Planner from "./pages/Planner"; // ✅ Added import
+import Planner from "./pages/Planner";
+import Dashboard from "./pages/Dashboard";
+import PlannerProgress from "./components/PlannerProgress"; //  
+import SpendingLimits from "./pages/SpendingLimits"; //  
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -25,6 +28,14 @@ const AppRoutes = () => {
         <Route
           path="/"
           element={<Navigate to={token ? "/expenses" : "/signin"} replace />}
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
         />
         <Route
           path="/add-expense"
@@ -58,6 +69,22 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/planner/progress"
+          element={
+            <PrivateRoute>
+              <PlannerProgress />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/limits"
+          element={
+            <PrivateRoute>
+              <SpendingLimits />
+            </PrivateRoute>
+          }
+        />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
     </Layout>
@@ -80,6 +107,7 @@ function App() {
 }
 
 export default App;
+
 
 
 

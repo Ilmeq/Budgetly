@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { FaFilter, FaUndo, FaTrash } from "react-icons/fa";
+import {
+  FaFilter,
+  FaUndo,
+  FaTrash,
+  FaArrowLeft,
+  FaArrowRight,
+} from "react-icons/fa";
 
 function ExpensesPage() {
   const [expenses, setExpenses] = useState([]);
   const [filteredExpenses, setFilteredExpenses] = useState([]);
-  const [filterType, setFilterType] = useState(""); // "income" or "expense"
+  const [filterType, setFilterType] = useState("");
   const [filterDate, setFilterDate] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,7 +19,6 @@ function ExpensesPage() {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const response = await fetch("http://localhost:5000/api/expenses", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -36,31 +41,21 @@ function ExpensesPage() {
 
   useEffect(() => {
     fetchData();
-
-    const handleUpdate = () => {
-      fetchData();
-    };
-
+    const handleUpdate = () => fetchData();
     window.addEventListener("expenseAdded", handleUpdate);
-
-    return () => {
-      window.removeEventListener("expenseAdded", handleUpdate);
-    };
+    return () => window.removeEventListener("expenseAdded", handleUpdate);
   }, []);
 
   const applyFilter = () => {
     let filtered = [...expenses];
 
     if (filterType) {
-      filtered = filtered.filter(
-        (item) => item.type?.toLowerCase() === filterType
-      );
+      filtered = filtered.filter((item) => item.type?.toLowerCase() === filterType);
     }
 
     if (filterDate) {
       filtered = filtered.filter(
-        (item) =>
-          new Date(item.date).toISOString().split("T")[0] === filterDate
+        (item) => new Date(item.date).toISOString().split("T")[0] === filterDate
       );
     }
 
@@ -80,7 +75,7 @@ function ExpensesPage() {
 
     try {
       const token = localStorage.getItem("token");
-      const endpoint = type === 'income' ? 'incomes' : 'expenses';
+      const endpoint = type === "income" ? "incomes" : "expenses";
 
       const response = await fetch(`http://localhost:5000/api/${endpoint}/${id}`, {
         method: "DELETE",
@@ -90,15 +85,11 @@ function ExpensesPage() {
       });
 
       if (response.ok) {
-        // Remove deleted record from state
         const updatedExpenses = expenses.filter((expense) => expense._id !== id);
         setExpenses(updatedExpenses);
-
-        // Also update filtered expenses (in case a filter is applied)
         const updatedFiltered = filteredExpenses.filter((expense) => expense._id !== id);
         setFilteredExpenses(updatedFiltered);
 
-        // Adjust current page if needed
         if (updatedFiltered.length <= (currentPage - 1) * itemsPerPage) {
           setCurrentPage((prev) => Math.max(prev - 1, 1));
         }
@@ -126,63 +117,67 @@ function ExpensesPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Expenses</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800">Expenses</h1>
 
-      {/* Filter Bar */}
-      <div className="flex items-center gap-4 bg-gray-100 p-4 rounded-md mb-4 shadow-sm flex-wrap">
-        <div className="flex items-center gap-2">
-          <FaFilter className="text-gray-600" />
-          <span className="text-gray-700 font-medium">Filter By</span>
+      {/* Fancy Filter Bar */}
+      <div className="flex flex-wrap items-center gap-4 bg-gradient-to-r from-sky-100 to-indigo-100 p-5 rounded-xl shadow-lg border border-indigo-200 mb-6">
+        <div className="flex items-center gap-2 text-indigo-700 font-semibold text-lg">
+          <FaFilter />
+          <span>Filters</span>
         </div>
-        <div>
-          <label className="mr-2 text-sm">Date:</label>
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Date:</label>
           <input
             type="date"
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
-            className="border border-gray-300 rounded px-2 py-1 text-sm"
+            className="border border-indigo-300 rounded-lg px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
-        <div>
-          <label className="mr-2 text-sm">Expense Type:</label>
-          <input
-            type="radio"
-            name="type"
-            value="expense"
-            checked={filterType === "expense"}
-            onChange={(e) => setFilterType(e.target.value)}
-          />
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">Type:</label>
+          <label className="inline-flex items-center gap-1 text-sm">
+            <input
+              type="radio"
+              name="type"
+              value="expense"
+              checked={filterType === "expense"}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="accent-red-500"
+            />
+            Expense
+          </label>
+          <label className="inline-flex items-center gap-1 text-sm">
+            <input
+              type="radio"
+              name="type"
+              value="income"
+              checked={filterType === "income"}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="accent-green-500"
+            />
+            Income
+          </label>
         </div>
-        <div>
-          <label className="mr-2 text-sm">Income Type:</label>
-          <input
-            type="radio"
-            name="type"
-            value="income"
-            checked={filterType === "income"}
-            onChange={(e) => setFilterType(e.target.value)}
-          />
-        </div>
-        <div>
+
+        <div className="flex gap-2">
           <button
             onClick={applyFilter}
-            className="bg-blue-500 text-white text-sm px-3 py-1 rounded hover:bg-blue-600"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium shadow transition duration-200 active:scale-95"
           >
             Apply
           </button>
-        </div>
-        <div className="flex items-center">
           <button
             onClick={resetFilters}
-            className="flex items-center gap-1 bg-gray-300 text-gray-800 text-sm px-3 py-1 rounded hover:bg-gray-400"
+            className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-1.5 rounded-lg text-sm font-medium shadow transition duration-200 active:scale-95"
           >
             <FaUndo /> Reset
           </button>
-        </div>
-        <div>
           <button
             onClick={fetchData}
-            className="bg-green-500 text-white text-sm px-3 py-1 rounded hover:bg-green-600"
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium shadow transition duration-200 active:scale-95"
           >
             Refresh
           </button>
@@ -225,7 +220,7 @@ function ExpensesPage() {
                 <td className="py-3 px-6 text-left">
                   <button
                     onClick={() => handleDelete(item._id, item.type)}
-                    className="text-red-600 hover:text-red-800 flex items-center gap-1"
+                    className="text-red-600 hover:text-red-800 flex items-center gap-1 transition duration-200 active:scale-95"
                     title="Delete Record"
                   >
                     <FaTrash /> Delete
@@ -244,14 +239,15 @@ function ExpensesPage() {
         </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-4">
+      {/* Fancy Pagination Controls */}
+      <div className="flex justify-between items-center mt-6">
         <button
           onClick={goToPreviousPage}
           disabled={currentPage === 1}
-          className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg hover:from-purple-600 hover:to-pink-600 transition duration-200 active:scale-95 disabled:opacity-50"
         >
-          ◀ Previous
+          <FaArrowLeft />
+          Previous
         </button>
         <span className="text-sm">
           Page {currentPage} of {totalPages}
@@ -259,9 +255,10 @@ function ExpensesPage() {
         <button
           onClick={goToNextPage}
           disabled={currentPage === totalPages}
-          className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-500 to-blue-500 rounded-lg hover:from-green-600 hover:to-blue-600 transition duration-200 active:scale-95 disabled:opacity-50"
         >
-          Next ▶
+          Next
+          <FaArrowRight />
         </button>
       </div>
     </div>
@@ -269,6 +266,9 @@ function ExpensesPage() {
 }
 
 export default ExpensesPage;
+
+
+
 
 
 

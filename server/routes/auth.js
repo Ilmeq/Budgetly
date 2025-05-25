@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const User = require('../models/User');
 
-// ✅ Signup route (no phone)
+// Signup route (no phone)
 router.post('/signup', async (req, res) => {
   try {
     const { name, surname, email, password } = req.body;
@@ -30,12 +30,12 @@ router.post('/signup', async (req, res) => {
 
     res.status(201).json({ message: 'User created successfully.', token });
   } catch (err) {
-    console.error('❌ Signup error:', err);
+    console.error(' Signup error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// ✅ Login route (email or phone)
+// Login route (email or phone)
 router.post('/login', async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
@@ -59,12 +59,12 @@ router.post('/login', async (req, res) => {
 
     res.json({ message: 'Login successful', token });
   } catch (err) {
-    console.error('❌ Login error:', err);
+    console.error(' Login error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// ✅ Protected route
+//  Protected route
 const authenticateToken = require('../middleware/authMiddleware');
 
 router.get('/users', authenticateToken, async (req, res) => {
@@ -72,7 +72,7 @@ router.get('/users', authenticateToken, async (req, res) => {
     const users = await User.find().select('-password');
     res.json(users);
   } catch (err) {
-    console.error('❌ Error fetching users:', err);
+    console.error(' Error fetching users:', err);
     res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });

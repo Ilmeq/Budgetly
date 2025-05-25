@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
-import PlannerProgress from "../components/PlannerProgress";  // NEW import
+import { useNavigate } from "react-router-dom";  // Kept in case you need it later
 
 const Planner = () => {
+  // You can remove useNavigate if you're not using it anymore
+  // const navigate = useNavigate(); 
+
   const categoryList = [
     "Groceries",
     "Bills, rent, insurance",
@@ -10,7 +13,7 @@ const Planner = () => {
     "Medical",
   ];
 
-  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
 
   const [initialAmount, setInitialAmount] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -21,9 +24,7 @@ const Planner = () => {
       return acc;
     }, {})
   );
-
-  // NEW state to trigger progress refresh
-  const [refreshProgress, setRefreshProgress] = useState(false);
+  const [isSaved, setIsSaved] = useState(false); // NEW: track if the form was saved
 
   useEffect(() => {
     const savedPlanner = JSON.parse(localStorage.getItem("plannerData"));
@@ -31,14 +32,19 @@ const Planner = () => {
       setInitialAmount(savedPlanner.initialAmount || "");
       setStartDate(savedPlanner.startDate || "");
       setEndDate(savedPlanner.endDate || "");
-      setSpendingLimits(savedPlanner.spendingLimits || {});
+      setSpendingLimits(
+        categoryList.reduce((acc, cat) => {
+          acc[cat] =
+            savedPlanner.categories?.find((c) => c.category === cat)?.limit || "";
+          return acc;
+        }, {})
+      );
     }
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Prepare categories array to send to backend
     const categoriesArray = Object.entries(spendingLimits).map(([category, limit]) => ({
       category,
       limit: Number(limit) || 0,
@@ -69,11 +75,8 @@ const Planner = () => {
 
       if (res.ok) {
         alert("Planner saved successfully!");
-        // Save locally if you want
         localStorage.setItem("plannerData", JSON.stringify(plannerData));
-
-        // Trigger progress refresh after save
-        setRefreshProgress(prev => !prev);
+        setIsSaved(true); // Show the success message
       } else {
         const errorText = await res.text();
         alert("Failed to save planner: " + errorText);
@@ -88,7 +91,9 @@ const Planner = () => {
       <h1 className="text-2xl font-bold mb-6">Planner Setup</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block font-medium mb-1">Initial Amount (your starting balance)</label>
+          <label className="block font-medium mb-1">
+            Initial Amount (your starting balance)
+          </label>
           <input
             type="number"
             value={initialAmount}
@@ -130,7 +135,9 @@ const Planner = () => {
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mt-4 mb-2">Set Spending Limits by Category</h2>
+          <h2 className="text-lg font-semibold mt-4 mb-2">
+            Set Spending Limits by Category
+          </h2>
           {categoryList.map((category) => (
             <div key={category} className="flex items-center gap-4 mb-2">
               <label className="w-56">{category}</label>
@@ -158,15 +165,19 @@ const Planner = () => {
         </button>
       </form>
 
-      {/* Pass refreshProgress prop to PlannerProgress */}
-      <div className="mt-12">
-        <PlannerProgress refresh={refreshProgress} />
-      </div>
+      {isSaved && (
+        <p className="text-green-600 font-semibold mt-6">
+           Planner saved successfully!
+        </p>
+      )}
     </div>
   );
 };
 
 export default Planner;
+
+
+
 
 
 

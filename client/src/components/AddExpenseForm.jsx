@@ -47,6 +47,12 @@ const AddExpenseForm = () => {
         console.log("Expense saved:", data);
         alert("Expense added successfully!");
 
+console.log("🚀 Dispatching expenseAdded:", {
+  category: formData.category,
+  amount: parseFloat(formData.amount)
+});
+
+
         // Dispatch event
         window.dispatchEvent(
           new CustomEvent("expenseAdded", {

@@ -22,7 +22,7 @@ router.post('/', authenticateToken, async (req, res) => {
 
     res.status(201).json(planner);
   } catch (error) {
-    console.error("❌ Error saving planner:", error);
+    console.error(" Error saving planner:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -76,14 +76,51 @@ router.get('/progress', authenticateToken, async (req, res) => {
       }
     });
 
-    res.json({ categories: progress });
+    // ** New notifications calculation logic **
+    const notifications = [];
+
+    let allCategoriesExceeded = true;
+
+    activePlanner.categories.forEach((cat) => {
+      const catProgress = progress[cat.category];
+      if (!catProgress) return;
+
+      const { spent, limit } = catProgress;
+      if (limit === 0) return; // avoid division by zero
+
+      const percentSpent = (spent / limit) * 100;
+
+      // Track if this category is NOT exceeded
+      if (percentSpent <= 100) allCategoriesExceeded = false;
+
+      if (percentSpent >= 100) {
+        notifications.push(
+          `You have exceeded your spending limit in "${cat.category}", reduce your spending in other categories!`
+        );
+      } else if (percentSpent >= 90) {
+        notifications.push(
+          `Warning: You have spent 90% of your set amount limit in "${cat.category}"!`
+        );
+      } else if (percentSpent >= 80) {
+        notifications.push(
+          `Warning: You have spent 80% of your set amount limit in "${cat.category}"!`
+        );
+      }
+    });
+
+    if (allCategoriesExceeded && activePlanner.categories.length > 0) {
+      notifications.push("You have exceeded spending in all categories, add some income!");
+    }
+
+    res.json({ categories: progress, notifications });
   } catch (error) {
-    console.error('❌ Error in /planner/progress:', error);
+    console.error(' Error in /planner/progress:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
 module.exports = router;
+
 
 
 

@@ -40,7 +40,7 @@ const SignUp = () => {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        navigate("/expenses");
+        navigate("/signin");  // Redirecting to the Login page after successful sign up
       } else {
         alert(data.message || "Signup failed");
       }
@@ -121,5 +121,6 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
 
 
