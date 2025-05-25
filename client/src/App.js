@@ -1,6 +1,6 @@
-// App.js
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ExpensesProvider } from "./context/ExpensesContext"; // Import the provider
 
 import AddExpensePage from "./pages/AddExpensePage";
 import ExpensesPage from "./pages/ExpensesPage";
@@ -9,8 +9,8 @@ import AddIncomePage from "./pages/AddIncomePage";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import PrivateRoute from "./PrivateRoute";
-import Dashboard from "./pages/Dashboard"
-
+import Dashboard from "./pages/Dashboard";
+import Badges from "./pages/Badges";
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -59,6 +59,14 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/badges"
+          element={
+            <PrivateRoute>
+              <Badges />
+            </PrivateRoute>
+          }
+        />
        
         <Route path="/signup" element={<SignUp />} />
       </Routes>
@@ -76,14 +84,14 @@ const AppRoutes = () => {
 function App() {
   return (
     <Router>
-      <AppRoutes />
+      <ExpensesProvider> {/* Wrap everything with ExpensesProvider */}
+        <AppRoutes />
+      </ExpensesProvider>
     </Router>
   );
 }
 
 export default App;
-
-
 
 
 

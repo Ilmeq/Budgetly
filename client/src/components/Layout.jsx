@@ -52,14 +52,6 @@ const Layout = ({ children }) => {
             Expenses
           </Link>
           <Link
-            to="/goals"
-            className={`block w-full text-left px-4 py-2 rounded-md ${
-              isActive("/goals") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
-            }`}
-          >
-            Goals
-          </Link>
-          <Link
             to="/badges"
             className={`block w-full text-left px-4 py-2 rounded-md ${
               isActive("/badges") ? "bg-teal-500 text-white" : "hover:bg-gray-200"
@@ -76,12 +68,6 @@ const Layout = ({ children }) => {
             Planner
           </Link>
           <div className="mt-10 border-t pt-4">
-            <Link
-              to="/settings"
-              className="block w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md"
-            >
-              Settings
-            </Link>
             <button
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 hover:bg-gray-200 rounded-md text-red-500"
@@ -94,16 +80,6 @@ const Layout = ({ children }) => {
 
       {/* Main Content */}
       <main className="flex-1 p-8 bg-[#e7f7fe]">
-        {/* Top Bar */}
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full max-w-md px-4 py-2 rounded-md border outline-none"
-          />
-        </div>
-
-        {/* Page Content */}
         {children}
       </main>
     </div>

@@ -15,46 +15,56 @@ const AddIncomeForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
+  
+  if (!token) {
+    alert("Please sign in first");
+    window.location.href = "/signin";
+    return;
+  }
 
-    try {
-      const response = await fetch("http://localhost:5000/api/incomes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+  try {
+    const response = await fetch("http://localhost:5000/api/incomes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Income saved:", data);
+      alert("Income added successfully!");
+      window.dispatchEvent(new Event("expenseAdded"));
+      setFormData({
+        date: "",
+        category: "",
+        amount: "",
+        title: "",
+        message: "",
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Income saved:", data);
-        alert("Income added successfully!");
-
-        // ✅ Dispatch event to notify other components
-        window.dispatchEvent(new Event("expenseAdded"));
-
-        setFormData({
-          date: "",
-          category: "",
-          amount: "",
-          title: "",
-          message: "",
-        });
+    } else {
+      if (response.status === 401) {
+        // Token is invalid/expired
+        localStorage.removeItem("token");
+        window.location.href = "/signin";
       } else {
         const errorText = await response.text();
         console.error("Failed to save income:", errorText);
         alert("Failed to save income: " + errorText);
       }
-    } catch (error) {
-      console.error("Error connecting to backend:", error);
-      alert("Error connecting to backend.");
     }
-  };
+  } catch (error) {
+    console.error("Error connecting to backend:", error);
+    alert("Error connecting to backend.");
+  }
+};
 
+  
   return (
     <div className="max-w-md mx-auto bg-white rounded-3xl p-6 shadow-md">
       <h2 className="text-xl font-semibold mb-4">+ Add Income</h2>

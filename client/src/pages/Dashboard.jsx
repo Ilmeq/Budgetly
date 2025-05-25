@@ -180,7 +180,7 @@ function Dashboard() {
               </svg>
             </div>
           </div>
-          <div className="text-3xl font-bold">${totalIncome.toFixed(2)}</div>
+          <div className="text-3xl font-bold animate-pulse">${totalIncome.toFixed(2)}</div>
           <div className="mt-2 text-sm text-green-500 flex items-center">
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
@@ -246,7 +246,7 @@ function Dashboard() {
           </div>
         </div>
       </div>
-      
+
       {/* Chart Section */}
       <div className="bg-white rounded-xl shadow-md p-6 mb-6">
         <div className="flex justify-between items-center mb-6">
